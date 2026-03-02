@@ -1,0 +1,116 @@
+/* Pricing page styles */
+.pricing-page {
+  min-height: 100vh;
+}
+
+.pricing-hero {
+  padding: 6rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.05), hsl(var(--accent) / 0.1));
+}
+
+.pricing-hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 1rem;
+}
+
+.pricing-hero-subtitle {
+  color: hsl(var(--muted-foreground));
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 1.125rem;
+}
+
+.pricing-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.pricing-card {
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  border: 1px solid hsl(var(--border));
+  transition: all 0.3s;
+}
+
+.pricing-card.featured {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 1px hsl(var(--primary)), var(--shadow-lg);
+  transform: scale(1.02);
+}
+
+.pricing-card-badge {
+  display: inline-block;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.pricing-card-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.pricing-card-description {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+.pricing-card-price {
+  margin-bottom: 1.5rem;
+}
+
+.pricing-card-price .amount {
+  font-size: 3rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.pricing-card-price .period {
+  color: hsl(var(--muted-foreground));
+}
+
+.pricing-card-features {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.pricing-card-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+}
+
+.pricing-card-features li svg {
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .pricing-hero-title {
+    font-size: 2rem;
+  }
+  
+  .pricing-card.featured {
+    transform: none;
+  }
+}

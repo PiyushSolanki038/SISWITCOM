@@ -1,0 +1,185 @@
+/* Document Editor Styles */
+
+/* Headings */
+.doc-h1 {
+  color: #1A3C34;
+  border-bottom: 2px solid #1A3C34;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.doc-h3 {
+  color: #1A3C34;
+  margin-top: 20px;
+  font-size: 1.17em;
+  font-weight: bold;
+}
+
+.doc-h3-boxed {
+  background-color: #1A3C34;
+  color: white;
+  padding: 8px 12px;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 1.17em;
+  font-weight: bold;
+}
+
+.doc-h3-underline {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+  color: #1A3C34;
+  font-size: 1.17em;
+  font-weight: bold;
+}
+
+/* Text Utilities */
+.doc-text-center {
+  text-align: center;
+}
+
+.doc-text-right {
+  text-align: right;
+}
+
+.doc-text-gray {
+  color: #64748b;
+}
+
+.doc-mb-30 {
+  margin-bottom: 30px;
+}
+
+/* Containers */
+.doc-info-box {
+  background-color: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.doc-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+/* Lists */
+.doc-ul {
+  list-style-type: disc;
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.doc-ol {
+  list-style-type: decimal;
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+/* Tables */
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.doc-th {
+  background-color: #1A3C34;
+  color: white;
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #1A3C34;
+}
+
+.doc-td {
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.doc-tr-header {
+  background-color: #1A3C34;
+  color: white;
+}
+
+.doc-tr-stripe:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+/* Invoice Specific */
+.doc-invoice-header-bg {
+  background-color: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+.doc-invoice-th {
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 12px;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: left;
+}
+
+.doc-invoice-td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.doc-invoice-total-box {
+  width: 300px;
+}
+
+.doc-invoice-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.doc-invoice-final {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #1A3C34;
+  border-top: 2px solid #1A3C34;
+}
+
+.doc-footer-dashed {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px dashed #e2e8f0;
+}
+
+/* Editor Placeholder */
+.document-editor-content:empty:before {
+  content: 'Start writing something...';
+  color: #94a3b8;
+  font-style: italic;
+  pointer-events: none;
+  display: block;
+}
+
+/* Fallback for when browser adds <br> */
+.document-editor-content br:only-child {
+  content: ' ';
+}
+
+.document-editor-content:has(> br:only-child):before {
+  content: 'Start writing something...';
+  color: #94a3b8;
+  font-style: italic;
+  pointer-events: none;
+  position: absolute;
+}

@@ -1,0 +1,85 @@
+@import './accounts.css';
+
+/* Opportunities specific styles */
+.opportunities-pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.pipeline-column {
+  background: hsl(var(--card));
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--border));
+  padding: 1rem;
+}
+
+.pipeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.pipeline-title {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.pipeline-count {
+  background: hsl(var(--muted) / 0.2);
+  color: hsl(var(--muted-foreground));
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.pipeline-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.opportunity-card {
+  background: hsl(var(--background));
+  border-radius: calc(var(--radius) - 4px);
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.opportunity-card:hover {
+  border-color: hsl(var(--primary));
+}
+
+.opportunity-card h4 {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.opportunity-card p {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.75rem;
+}
+
+.opportunity-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.opportunity-value {
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+
+.opportunity-date {
+  color: hsl(var(--muted-foreground));
+}

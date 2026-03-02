@@ -1,0 +1,82 @@
+/* Marketing layout styles */
+.marketing-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.marketing-main {
+  flex: 1;
+  padding-top: 64px; /* Account for fixed header */
+}
+
+/* Footer */
+.marketing-footer {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  padding: 4rem 2rem 2rem;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 4rem;
+  margin-bottom: 3rem;
+}
+
+.footer-brand .logo-text {
+  color: hsl(var(--background));
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.footer-description {
+  color: hsl(var(--background) / 0.7);
+  max-width: 300px;
+}
+
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.footer-column h4 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: hsl(var(--background));
+}
+
+.footer-column a {
+  display: block;
+  color: hsl(var(--background) / 0.7);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s;
+}
+
+.footer-column a:hover {
+  color: hsl(var(--background));
+}
+
+.footer-bottom {
+  border-top: 1px solid hsl(var(--background) / 0.2);
+  padding-top: 2rem;
+  text-align: center;
+  color: hsl(var(--background) / 0.5);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

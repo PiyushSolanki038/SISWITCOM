@@ -1,0 +1,805 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  APPROVAL_PENDING
+  APPROVED
+  REJECTED
+  ACCEPTED
+}
+enum Role {
+  ADMIN
+  OWNER
+  EMPLOYEE
+  CUSTOMER
+}
+
+model User {
+  id         String     @id @default(uuid()) @db.Uuid
+  tenantId   String     @db.Uuid
+  email      String     @unique
+  password   String?
+  firstName  String?
+  lastName   String?
+  subscriptionStatus String?
+  subscriptionPlan  String?
+  resetPasswordToken String?
+  resetPasswordExpire DateTime?
+  role       Role
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  accounts   Account[]  @relation("AccountCreatedBy")
+  contacts   Contact[]  @relation("ContactCreatedBy")
+  activities Activity[] @relation("ActivityUser")
+  notes      Note[]     @relation("NoteUser")
+  payments   Payment[]  @relation("PaymentUser")
+  documents  Document[] @relation("DocumentUser")
+  orders     ERPOrder[] @relation("ERPOrderCreatedBy")
+  contracts  Contract[] @relation("ContractCreatedBy")
+  leads      Lead[]     @relation("LeadOwner")
+  opportunities Opportunity[] @relation("OpportunityOwner")
+  subscriptions Subscription[]
+  paymentTransactions PaymentTransaction[]
+  invitationsCreated Invitation[] @relation("InvitationCreatedBy")
+  attendance        Attendance[]  @relation("AttendanceUser")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Account {
+  id         String     @id @default(uuid()) @db.Uuid
+  tenantId   String     @db.Uuid
+  name       String
+  industry   String?
+  website    String?
+  phone      String?
+  location   String?
+  address    String?
+  ownerName  String?
+  status     String?
+  annualRevenue String?
+  employees  String?
+  description String?
+  lastContact DateTime?
+  createdById String?   @db.Uuid
+  createdBy  User?      @relation("AccountCreatedBy", fields: [createdById], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  contacts   Contact[]
+  leads      Lead[]
+  opportunities Opportunity[]
+  activities Activity[]
+  notes      Note[]
+  quotes     Quote[]
+  contracts  Contract[]
+  documents  Document[]
+  orders     ERPOrder[]
+  invoices   Invoice[]
+  creditNotes CreditNote[]
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Contact {
+  id          String     @id @default(uuid()) @db.Uuid
+  tenantId    String     @db.Uuid
+  name        String?
+  firstName   String?
+  lastName    String?
+  email       String?
+  phone       String?
+  role        String?
+  company     String?
+  location    String?
+  address     String?
+  status      String?
+  lastContacted DateTime?
+  avatar      String?
+  accountId   String?   @db.Uuid
+  account     Account?   @relation(fields: [accountId], references: [id])
+  createdById String?   @db.Uuid
+  createdBy   User?      @relation("ContactCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  leads       Lead[]
+  opportunitiesAsContact Opportunity[] @relation("OpportunityContact")
+  opportunitiesAsPrimary Opportunity[] @relation("OpportunityPrimaryContact")
+  activities  Activity[]
+  notes       Note[]
+  quotes      Quote[]
+  signings    ContractSigner[]
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Lead {
+  id         String    @id @default(uuid()) @db.Uuid
+  tenantId   String    @db.Uuid
+  name       String?
+  title      String?
+  company    String?
+  source     String?
+  status     String?
+  email      String?
+  phone      String?
+  ownerName  String?
+  score      Int?
+  address    String?
+  notesText  String?
+  lastContacted DateTime?
+  accountId  String?   @db.Uuid
+  account    Account?  @relation(fields: [accountId], references: [id])
+  contactId  String?   @db.Uuid
+  contact    Contact?  @relation(fields: [contactId], references: [id])
+  ownerId    String?   @db.Uuid
+  owner      User?     @relation("LeadOwner", fields: [ownerId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  opportunities Opportunity[]
+  activities Activity[]
+  notes      Note[]
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Opportunity {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  title       String?
+  company     String?
+  value       Decimal?  @db.Decimal(20, 2)
+  stage       String?
+  probability Int?
+  closingDate DateTime?
+  ownerName   String?
+  description String?
+  contactName String?
+  accountId   String?   @db.Uuid
+  account     Account?  @relation(fields: [accountId], references: [id])
+  contactId   String?   @db.Uuid
+  contact     Contact?  @relation("OpportunityContact", fields: [contactId], references: [id])
+  leadId      String?   @db.Uuid
+  lead        Lead?     @relation(fields: [leadId], references: [id])
+  pipelineStageId String? @db.Uuid
+  pipelineStage   PipelineStage? @relation(fields: [pipelineStageId], references: [id])
+  ownerId     String?   @db.Uuid
+  owner       User?     @relation("OpportunityOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  activities  Activity[]
+  notes       Note[]
+  quotes      Quote[]
+  contracts   Contract[] @relation("ContractOpportunity")
+  primaryContactId String?   @db.Uuid
+  primaryContact   Contact? @relation("OpportunityPrimaryContact", fields: [primaryContactId], references: [id])
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Activity {
+  id            String     @id @default(uuid()) @db.Uuid
+  tenantId      String     @db.Uuid
+  type          String
+  title         String?
+  description   String?
+  date          DateTime?
+  time          String?
+  duration      Int?
+  status        String?
+  outcome       String?
+  relatedTo     Json?
+  dueDate       DateTime?
+  completed     Boolean    @default(false)
+  accountId     String?   @db.Uuid
+  account       Account?   @relation(fields: [accountId], references: [id])
+  contactId     String?   @db.Uuid
+  contact       Contact?   @relation(fields: [contactId], references: [id])
+  leadId        String?   @db.Uuid
+  lead          Lead?      @relation(fields: [leadId], references: [id])
+  opportunityId String?   @db.Uuid
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  userId        String?   @db.Uuid
+  user          User?      @relation("ActivityUser", fields: [userId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  notes         Note[]     @relation("ActivityNotes")
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Note {
+  id            String     @id @default(uuid()) @db.Uuid
+  tenantId      String     @db.Uuid
+  title         String?
+  content       String
+  date          DateTime?
+  time          String?
+  accountId     String?   @db.Uuid
+  account       Account?   @relation(fields: [accountId], references: [id])
+  contactId     String?   @db.Uuid
+  contact       Contact?   @relation(fields: [contactId], references: [id])
+  leadId        String?   @db.Uuid
+  lead          Lead?      @relation(fields: [leadId], references: [id])
+  opportunityId String?   @db.Uuid
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  userId        String?   @db.Uuid
+  user          User?      @relation("NoteUser", fields: [userId], references: [id])
+  activityId    String?   @db.Uuid
+  activity      Activity?  @relation("ActivityNotes", fields: [activityId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Product {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  name        String
+  sku         String?   @unique
+  description String?
+  pricing_type String?  @default("one_time")
+  base_price  Decimal?  @db.Decimal(20, 2)
+  currency    String    @default("USD")
+  is_active   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  quoteItems  QuoteItem[]
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "product_id_tenantId")
+}
+
+model Quote {
+  id            String     @id @default(uuid()) @db.Uuid
+  quoteNumber   String?    @unique
+  tenantId      String     @db.Uuid
+  status        QuoteStatus
+  subtotal      Decimal?   @db.Decimal(20, 2)
+  taxTotal      Decimal?   @db.Decimal(20, 2)
+  discountTotal Decimal?   @db.Decimal(20, 2)
+  grandTotal    Decimal?   @db.Decimal(20, 2)
+  currency      String     @default("USD")
+  validUntil    DateTime?
+  accountId     String?   @db.Uuid
+  account       Account?   @relation(fields: [accountId], references: [id])
+  contactId     String?   @db.Uuid
+  contact       Contact?   @relation(fields: [contactId], references: [id])
+  opportunityId String?   @db.Uuid
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
+  createdBy     String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  items         QuoteItem[]
+  contracts     Contract[]
+  documents     Document[]
+  orders        ERPOrder[]
+
+  approvals     QuoteApproval[]
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "quote_id_tenantId")
+}
+
+model PipelineStage {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String?   @db.Uuid
+  name        String
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  opportunities Opportunity[]
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model QuoteItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  quoteId    String   @db.Uuid
+  quote      Quote    @relation(fields: [quoteId], references: [id])
+  productId  String   @db.Uuid
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
+  unitPrice  Decimal  @db.Decimal(20, 2)
+  discount   Decimal? @db.Decimal(5, 2)
+  total      Decimal  @db.Decimal(20, 2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([quoteId, productId])
+  @@index([tenantId])
+}
+
+model QuoteApproval {
+  id          String       @id @default(uuid()) @db.Uuid
+  tenantId    String       @db.Uuid
+  quoteId     String       @db.Uuid
+  quote       Quote        @relation(fields: [quoteId], references: [id])
+  requestedBy String       @db.Uuid
+  decidedBy   String?      @db.Uuid
+  status      String       @default("PENDING") // PENDING, APPROVED, REJECTED
+  comment     String?
+  decidedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([tenantId])
+}
+
+model Contract {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  contract_number String?
+  name        String?
+  account_id  String?   @db.Uuid
+  account     Account?  @relation(fields: [account_id], references: [id])
+  customer_name String?
+  quote_id    String?   @db.Uuid
+  quote       Quote?    @relation(fields: [quote_id], references: [id])
+  contract_type String? @default("MSA")
+  status      String?
+  start_date  DateTime?
+  end_date    DateTime?
+  renewal_type String?  @default("manual")
+  contract_value Decimal?
+  owner_id    String?
+  content     String?
+  createdById String?   @db.Uuid
+  createdBy   User?     @relation("ContractCreatedBy", fields: [createdById], references: [id])
+  opportunityId String?   @db.Uuid
+  opportunity  Opportunity? @relation("ContractOpportunity", fields: [opportunityId], references: [id])
+  currency    String    @default("USD")
+  signers     Json?
+  signersRel  ContractSigner[]
+  signingSessions SigningSession[]
+  approvals   ContractApproval[]
+  signatureRequests ContractSignatureRequest[]
+  auditLogs  ContractAuditLog[]
+  versions   ContractVersion[]
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  documents   Document[]
+  orders      ERPOrder[]
+
+  @@index([tenantId])
+  @@unique([contract_number, tenantId], name: "contract_number_tenantId")
+}
+
+model ContractSigner {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  contractId String   @db.Uuid
+  contract   Contract @relation(fields: [contractId], references: [id])
+  contactId  String?   @db.Uuid
+  contact    Contact? @relation(fields: [contactId], references: [id])
+  name       String
+  email      String
+  role       String?
+  signedAt   DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model ERPOrder {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  orderNumber String?   @unique
+  status      String?
+  paymentStatus String?
+  fulfillmentStatus String?
+  subtotal    Decimal?  @db.Decimal(20, 2)
+  taxTotal    Decimal?  @db.Decimal(20, 2)
+  grandTotal  Decimal?  @db.Decimal(20, 2)
+  currency    String    @default("USD")
+  orderDate   DateTime?
+  items       Json?
+  accountId   String?   @db.Uuid
+  account     Account?  @relation(fields: [accountId], references: [id])
+  quoteId     String?   @db.Uuid
+  quote       Quote?    @relation(fields: [quoteId], references: [id])
+  contractId  String?   @db.Uuid
+  contract    Contract? @relation(fields: [contractId], references: [id])
+  createdById String?   @db.Uuid
+  createdBy   User?     @relation("ERPOrderCreatedBy", fields: [createdById], references: [id])
+  createdByStr String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  invoices    Invoice[]
+  documents   Document[]
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model SigningSession {
+  id           String   @id @default(uuid()) @db.Uuid
+  token        String   @unique
+  tenantId     String   @db.Uuid
+  contractId   String   @db.Uuid
+  contract     Contract @relation(fields: [contractId], references: [id])
+  signerEmail  String
+  signerName   String
+  status       String   @default("sent")
+  expiresAt    DateTime
+  viewedAt     DateTime?
+  signedAt     DateTime?
+  signatureData String?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Invoice {
+  id            String    @id @default(uuid()) @db.Uuid
+  tenantId      String    @db.Uuid
+  invoiceNumber String?   @unique
+  orderId       String?   @db.Uuid
+  order         ERPOrder? @relation(fields: [orderId], references: [id])
+  accountId     String?   @db.Uuid
+  account       Account?  @relation(fields: [accountId], references: [id])
+  issueDate     DateTime? @default(now())
+  dueDate       DateTime?
+  items         Json?
+  subtotal      Decimal?  @db.Decimal(20, 2)
+  taxTotal      Decimal?  @db.Decimal(20, 2)
+  grandTotal    Decimal?  @db.Decimal(20, 2)
+  balanceDue    Decimal?  @db.Decimal(20, 2)
+  currency      String    @default("USD")
+  status        String?
+  notes         String?
+  createdBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  payments      Payment[]
+  documents     Document[]
+  creditNotes   CreditNote[]
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Payment {
+  id             String    @id @default(uuid()) @db.Uuid
+  tenantId       String    @db.Uuid
+  paymentNumber  String?   @unique
+  invoiceId      String?   @db.Uuid
+  invoice        Invoice?  @relation(fields: [invoiceId], references: [id])
+  accountId      String?   @db.Uuid
+  customerId     String?   @db.Uuid
+  user           User?     @relation("PaymentUser", fields: [customerId], references: [id])
+  amount         Decimal   @db.Decimal(20, 2)
+  currency       String    @default("USD")
+  paymentDate    DateTime? @default(now())
+  paymentMethod  String?
+  referenceNumber String?
+  status         String?   @default("completed")
+  notes          String?
+  recordedBy     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model Subscription {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @db.Uuid
+  userId      String   @db.Uuid
+  user        User      @relation(fields: [userId], references: [id])
+  planName    String?
+  planId      String?   @db.Uuid
+  plan        Plan?     @relation(fields: [planId], references: [id])
+  status      String?   @default("active")
+  startDate   DateTime? @default(now())
+  endDate     DateTime?
+  billingCycle String?  @default("monthly")
+  amount      Decimal   @db.Decimal(20, 2)
+  currency    String    @default("USD")
+  razorpaySubscriptionId String?
+  lastPaymentDate DateTime?
+  nextPaymentDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  paymentTransactions PaymentTransaction[]
+}
+
+model PaymentTransaction {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String    @db.Uuid
+  userId          String   @db.Uuid
+  user            User     @relation(fields: [userId], references: [id])
+  subscriptionId  String?  @db.Uuid
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
+  provider        String   @default("paytm")
+  orderId         String
+  txnId           String?
+  amount          Decimal  @db.Decimal(20, 2)
+  status          String   @default("CREATED")
+  method          String?
+  paidAt          DateTime?
+  createdAt       DateTime @default(now())
+}
+
+model Plan {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @unique
+  priceMonthly  Decimal  @db.Decimal(20, 2)
+  priceYearly   Decimal  @db.Decimal(20, 2)
+  currency      String   @default("USD")
+  limits        Json?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  subscriptions Subscription[]
+}
+
+model Invitation {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  email       String
+  role        Role
+  tokenHash   String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REVOKED, EXPIRED
+  createdById String   @db.Uuid
+  createdBy   User     @relation(name: "InvitationCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model EmailLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String?  @db.Uuid
+  toEmail      String
+  subject      String
+  templateName String
+  messageId    String?
+  status       String   @default("SENT")
+  error        String?
+  sentAt       DateTime @default(now())
+  @@index([tenantId])
+}
+
+model Attendance {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  userId     String   @db.Uuid
+  user       User     @relation(name: "AttendanceUser", fields: [userId], references: [id])
+  date       DateTime
+  checkInTime DateTime
+  ip         String?
+  deviceInfo String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  @@unique([userId, date])
+}
+
+model RolePermission {
+  id        String   @id @default(uuid()) @db.Uuid
+  role      Role
+  module    String
+  allowed   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([role, module])
+}
+model Document {
+  id         String    @id @default(uuid()) @db.Uuid
+  tenantId   String    @db.Uuid
+  title      String
+  name       String?
+  type       String?
+  url        String
+  category   String?
+  linked_entity_id String?
+  linked_entity_model String?
+  size       String?
+  version    String?   @default("1.0")
+  accountId  String?   @db.Uuid
+  account    Account?  @relation(fields: [accountId], references: [id])
+  quoteId    String?   @db.Uuid
+  quote      Quote?    @relation(fields: [quoteId], references: [id])
+  contractId String?   @db.Uuid
+  contract   Contract? @relation(fields: [contractId], references: [id])
+  invoiceId  String?   @db.Uuid
+  invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
+  orderId    String?   @db.Uuid
+  order      ERPOrder? @relation(fields: [orderId], references: [id])
+  userId     String?   @db.Uuid
+  user       User?     @relation("DocumentUser", fields: [userId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  uploaded_by String?
+  created_at  DateTime  @default(now())
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model ContractTemplate {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String   @db.Uuid
+  name          String
+  contract_type String
+  content       String
+  version       Int      @default(1)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  clauses       ContractClause[]
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "contract_template_id_tenantId")
+  @@index([tenantId, created_at])
+}
+
+model ContractClause {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  templateId  String   @db.Uuid
+  template    ContractTemplate @relation(fields: [templateId], references: [id])
+  title       String
+  content     String
+  sortOrder   Int      @default(0)
+  required    Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, created_at])
+}
+
+model ContractApproval {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  contractId  String   @db.Uuid
+  contract    Contract @relation(fields: [contractId], references: [id])
+  requestedBy String   @db.Uuid
+  decidedBy   String?  @db.Uuid
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  reason      String?
+  comment     String?
+  decidedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model ContractSignatureRequest {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  contractId  String   @db.Uuid
+  contract    Contract @relation(fields: [contractId], references: [id])
+  signerEmail String
+  signerName  String
+  token       String   @unique
+  status      String   @default("sent") // sent, viewed, signed, declined, expired
+  expiresAt   DateTime
+  viewedAt    DateTime?
+  usedAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model ContractAuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  contractId  String   @db.Uuid
+  contract    Contract @relation(fields: [contractId], references: [id])
+  action      String
+  performedBy String   @db.Uuid
+  metadata    Json?
+  created_at  DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, created_at])
+}
+
+model ContractVersion {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @db.Uuid
+  contractId   String   @db.Uuid
+  contract     Contract @relation(fields: [contractId], references: [id])
+  version      Int      @default(1)
+  content      String
+  createdById  String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt])
+}
+
+model CreditNote {
+  id         String   @id @default(uuid()) @db.Uuid
+  noteNumber String?  @unique
+  invoiceId  String   @db.Uuid
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
+  accountId  String   @db.Uuid
+  account    Account  @relation(fields: [accountId], references: [id])
+  amount     Decimal  @db.Decimal(20, 2)
+  currency   String   @default("USD")
+  reason     String
+  status     String?  @default("draft")
+  issuedDate DateTime @default(now())
+  createdBy  String?
+  createdAt  DateTime @default(now())
+}
+
+// Notifications: Templates, Rules, and Delivery Logs
+model NotificationTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  subject     String
+  htmlContent String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "notification_template_id_tenantId")
+}
+
+model NotificationRule {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  eventType  String
+  templateId String?  @db.Uuid
+  isEnabled  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "notification_rule_id_tenantId")
+}
+
+model NotificationDeliveryLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  tenantId   String   @db.Uuid
+  eventType  String?
+  recipient  String
+  subject    String?
+  templateId String?  @db.Uuid
+  status     String   @default("SENT")
+  error      String?
+  sentAt     DateTime @default(now())
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "notification_delivery_log_id_tenantId")
+}
+
+// Integration settings (tenant-scoped, non-secret flags/metadata)
+model IntegrationSetting {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @db.Uuid
+  publicApiEnabled Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([tenantId])
+  @@unique([id, tenantId], name: "integration_setting_id_tenantId")
+}
